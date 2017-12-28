@@ -19,11 +19,13 @@ from keras.layers.normalization import BatchNormalization
 from keras.layers.advanced_activations import ELU
 from keras.layers import Input, Dense
 
+import audio_processor as ap
+
 tags = ['blues', 'classical', 'country', 'disco', 'hiphop', 'jazz', 'metal', 'pop', 'reggae', 'rock']
 if K.image_data_format() == 'channels_first':
-    input_shape = (1, 96, 1366)
+    input_shape = (1, ap.N_FFT, ap.FRAMES)
 else:
-    input_shape = (96, 1366, 1)
+    input_shape = (ap.N_FFT, ap.FRAMES, 1)
 
 if K.image_data_format() == 'channels_first':
     channel_axis = 1
