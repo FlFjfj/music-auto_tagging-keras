@@ -23,9 +23,9 @@ import audio_processor as ap
 
 tags = ['blues', 'classical', 'country', 'disco', 'hiphop', 'jazz', 'metal', 'pop', 'reggae', 'rock']
 if K.image_data_format() == 'channels_first':
-    input_shape = (1, ap.N_FFT, ap.FRAMES)
+    input_shape = (1, ap.N_FFT2, ap.FRAMES)
 else:
-    input_shape = (ap.N_FFT, ap.FRAMES, 1)
+    input_shape = (ap.N_FFT2, ap.FRAMES, 1)
 
 if K.image_data_format() == 'channels_first':
     channel_axis = 1
@@ -110,7 +110,7 @@ def MusicTaggerCNN(input_tensor=None,
     x = Convolution2D(64, (3, 3), padding='same', name='conv5')(x)
     x = BatchNormalization(axis=channel_axis, name='bn5')(x)
     x = ELU()(x)
-    x = MaxPooling2D(pool_size=(4, 4), name='pool5')(x)
+    x = MaxPooling2D(pool_size=(7, 2), name='pool5')(x)
 
     # Output
     x = Flatten()(x)
