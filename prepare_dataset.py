@@ -8,7 +8,7 @@ dataset_dir = "/home/user/University/genres/"
 prepared_dataset_dir = "./dataset"
 max_files = 10
 def main():
-    train_x = np.zeros(ap.melgram_shape)
+    train_x = np.zeros(ap.melgram_shape )
     train_y = np.zeros((0, len(cnnmodel.tags)), dtype=np.bool)
     for tag_idx in range(len(cnnmodel.tags)):
         cur_dir = dataset_dir + cnnmodel.tags[tag_idx] + "/"
