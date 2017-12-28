@@ -63,7 +63,7 @@ def MusicTaggerCNN(weights='msd', input_tensor=None,
                          '(pre-training on Million Song Dataset).')
 
     # Determine proper input shape
-    if K.image_dim_ordering() == 'th':
+    if K.image_data_format() == 'channels_first':
         input_shape = (1, 96, 1366)
     else:
         input_shape = (96, 1366, 1)
@@ -77,7 +77,7 @@ def MusicTaggerCNN(weights='msd', input_tensor=None,
             melgram_input = input_tensor
 
     # Determine input axis
-    if K.image_dim_ordering() == 'th':
+    if K.image_data_format() == 'channels_first':
         channel_axis = 1
         freq_axis = 2
         time_axis = 3
@@ -90,32 +90,32 @@ def MusicTaggerCNN(weights='msd', input_tensor=None,
     x = BatchNormalization(axis=freq_axis, name='bn_0_freq')(melgram_input)
 
     # Conv block 1
-    x = Convolution2D(64, 3, 3, border_mode='same', name='conv1')(x)
-    x = BatchNormalization(axis=channel_axis, mode=0, name='bn1')(x)
+    x = Convolution2D(64, (3, 3), padding='same', name='conv1')(x)
+    x = BatchNormalization(axis=channel_axis, name='bn1')(x)
     x = ELU()(x)
     x = MaxPooling2D(pool_size=(2, 4), name='pool1')(x)
 
     # Conv block 2
-    x = Convolution2D(128, 3, 3, border_mode='same', name='conv2')(x)
-    x = BatchNormalization(axis=channel_axis, mode=0, name='bn2')(x)
+    x = Convolution2D(128, (3, 3), padding='same', name='conv2')(x)
+    x = BatchNormalization(axis=channel_axis, name='bn2')(x)
     x = ELU()(x)
     x = MaxPooling2D(pool_size=(2, 4), name='pool2')(x)
 
     # Conv block 3
-    x = Convolution2D(128, 3, 3, border_mode='same', name='conv3')(x)
-    x = BatchNormalization(axis=channel_axis, mode=0, name='bn3')(x)
+    x = Convolution2D(128, (3, 3), padding='same', name='conv3')(x)
+    x = BatchNormalization(axis=channel_axis, name='bn3')(x)
     x = ELU()(x)
     x = MaxPooling2D(pool_size=(2, 4), name='pool3')(x)
 
     # Conv block 4
-    x = Convolution2D(128, 3, 3, border_mode='same', name='conv4')(x)
-    x = BatchNormalization(axis=channel_axis, mode=0, name='bn4')(x)
+    x = Convolution2D(128, (3, 3), padding='same', name='conv4')(x)
+    x = BatchNormalization(axis=channel_axis, name='bn4')(x)
     x = ELU()(x)
     x = MaxPooling2D(pool_size=(3, 5), name='pool4')(x)
 
     # Conv block 5
-    x = Convolution2D(64, 3, 3, border_mode='same', name='conv5')(x)
-    x = BatchNormalization(axis=channel_axis, mode=0, name='bn5')(x)
+    x = Convolution2D(64, (3, 3), padding='same', name='conv5')(x)
+    x = BatchNormalization(axis=channel_axis, name='bn5')(x)
     x = ELU()(x)
     x = MaxPooling2D(pool_size=(4, 4), name='pool5')(x)
 
@@ -130,8 +130,8 @@ def MusicTaggerCNN(weights='msd', input_tensor=None,
         return model    
     else: 
         # Load input
-        if K.image_dim_ordering() == 'tf':
-            raise RuntimeError("Please set image_dim_ordering == 'th'."
+        if K.image_data_format() == 'channels_first':
+            raise RuntimeError("Please set image_data_format == 'channels_last'."
                                "You can set it at ~/.keras/keras.json")
         model.load_weights('data/music_tagger_cnn_weights_%s.h5' % K._BACKEND,
                            by_name=True)

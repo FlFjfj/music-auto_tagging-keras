@@ -58,9 +58,10 @@ def main(net):
             melgram = np.load(melgram_path)
             melgrams = np.concatenate((melgrams, melgram), axis=0)
 
+    melgrams = np.transpose(melgrams, (0,2,3,1))
     # load model like this
     if net == 'cnn':
-        model = MusicTaggerCNN(weights='msd')
+        model = MusicTaggerCNN(weights=None)
     elif net == 'crnn':
         model = MusicTaggerCRNN(weights='msd')
     model.summary()
@@ -69,7 +70,7 @@ def main(net):
     start = time.time()
     pred_tags = model.predict(melgrams)
     # print like this...
-    print "Prediction is done. It took %d seconds." % (time.time()-start)
+    print("Prediction is done. It took %d seconds." % (time.time()-start))
     print('Printing top-10 tags for each track...')
     for song_idx, audio_path in enumerate(audio_paths):
         sorted_result = sort_result(tags, pred_tags[song_idx, :].tolist())
