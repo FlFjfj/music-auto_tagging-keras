@@ -1,6 +1,14 @@
 import librosa
 import numpy as np
 
+# mel-spectrogram parameters
+SR = 12000
+N_FFT = 512
+N_MELS = 96
+HOP_LEN = 256
+DURA = 29.12  # to make it 1366 frame..
+melgram_shape = (0, 1, 96, 1366)
+
 
 def compute_melgram(audio_path):
     ''' Compute a mel-spectrogram and returns it in a shape of (1,1,96,1366), where
@@ -13,13 +21,6 @@ def compute_melgram(audio_path):
     More info: http://librosa.github.io/librosa/generated/librosa.core.load.html#librosa.core.load
 
     '''
-
-    # mel-spectrogram parameters
-    SR = 12000
-    N_FFT = 512
-    N_MELS = 96
-    HOP_LEN = 256
-    DURA = 29.12  # to make it 1366 frame..
 
     src, sr = librosa.load(audio_path, sr=SR)  # whole signal
     n_sample = src.shape[0]

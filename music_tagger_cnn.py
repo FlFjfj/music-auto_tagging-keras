@@ -11,21 +11,30 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 from keras import backend as K
-from keras.layers import Input, Dense
 from keras.models import Model
-from keras.layers import Dense, Dropout, Flatten
+from keras.layers import Flatten
 from keras.layers.convolutional import Convolution2D
-from keras.layers.convolutional import MaxPooling2D, ZeroPadding2D
+from keras.layers.convolutional import MaxPooling2D
 from keras.layers.normalization import BatchNormalization
 from keras.layers.advanced_activations import ELU
-from keras.utils.data_utils import get_file
 from keras.layers import Input, Dense
 
-TH_WEIGHTS_PATH = 'https://github.com/keunwoochoi/music-auto_tagging-keras/blob/master/data/music_tagger_cnn_weights_theano.h5'
-TF_WEIGHTS_PATH = 'https://github.com/keunwoochoi/music-auto_tagging-keras/blob/master/data/music_tagger_cnn_weights_tensorflow.h5'
+tags = ['blues', 'classical', 'country', 'disco', 'hiphop', 'jazz', 'metal', 'pop', 'reggae', 'rock']
+if K.image_data_format() == 'channels_first':
+    input_shape = (1, 96, 1366)
+else:
+    input_shape = (96, 1366, 1)
 
+if K.image_data_format() == 'channels_first':
+    channel_axis = 1
+    freq_axis = 2
+    time_axis = 3
+else:
+    channel_axis = 3
+    freq_axis = 1
+    time_axis = 2
 
-def MusicTaggerCNN(weights='msd', input_tensor=None,
+def MusicTaggerCNN(input_tensor=None,
                    include_top=True):
     '''Instantiate the MusicTaggerCNN architecture,
     optionally loading weights pre-trained
@@ -57,17 +66,6 @@ def MusicTaggerCNN(weights='msd', input_tensor=None,
     # Returns
         A Keras model instance.
     '''
-    if weights not in {'msd', None}:
-        raise ValueError('The `weights` argument should be either '
-                         '`None` (random initialization) or `msd` '
-                         '(pre-training on Million Song Dataset).')
-
-    # Determine proper input shape
-    if K.image_data_format() == 'channels_first':
-        input_shape = (1, 96, 1366)
-    else:
-        input_shape = (96, 1366, 1)
-
     if input_tensor is None:
         melgram_input = Input(shape=input_shape)
     else:
@@ -77,14 +75,7 @@ def MusicTaggerCNN(weights='msd', input_tensor=None,
             melgram_input = input_tensor
 
     # Determine input axis
-    if K.image_data_format() == 'channels_first':
-        channel_axis = 1
-        freq_axis = 2
-        time_axis = 3
-    else:
-        channel_axis = 3
-        freq_axis = 1
-        time_axis = 2
+
 
     # Input block
     x = BatchNormalization(axis=freq_axis, name='bn_0_freq')(melgram_input)
@@ -122,17 +113,8 @@ def MusicTaggerCNN(weights='msd', input_tensor=None,
     # Output
     x = Flatten()(x)
     if include_top:
-        x = Dense(50, activation='sigmoid', name='output')(x)
+        x = Dense(len(tags), activation='sigmoid', name='output')(x)
 
     # Create model
     model = Model(melgram_input, x)
-    if weights is None:
-        return model    
-    else: 
-        # Load input
-        if K.image_data_format() == 'channels_first':
-            raise RuntimeError("Please set image_data_format == 'channels_last'."
-                               "You can set it at ~/.keras/keras.json")
-        model.load_weights('data/music_tagger_cnn_weights_%s.h5' % K._BACKEND,
-                           by_name=True)
-        return model
+    return model
