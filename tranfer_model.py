@@ -27,21 +27,24 @@ def calculate_features():
     content_input = np.transpose(ap.get_spectro(content_file), [0, 2, 3, 1])
 
     input_layer = features.input
-    style_layer = features.layers[4].output
-    content_layer = features.layers[-8].output
-    content_layer2 = features.layers[-4].output
+    style_layer = features.layers[8].output
+    content_layer = features.layers[16].output
+    # content_layer2 = features.layers[-4].output
+
+    print(style_layer)
+    print(content_layer)
 
     sess = K.get_session()
 
     style_data = sess.run(style_layer, {input_layer: style_input, K.learning_phase(): 0})
     content_data = sess.run(content_layer, {input_layer: content_input, K.learning_phase(): 0})
-    content_data2 = sess.run(content_layer2, {input_layer: content_input, K.learning_phase(): 0})
+    # content_data2 = sess.run(content_layer2, {input_layer: content_input, K.learning_phase(): 0})
 
     style_const = tf.constant(style_data)
     content_const = tf.constant(content_data)
-    content_const2 = tf.constant(content_data2)
+    # content_const2 = tf.constant(content_data2)
 
-    return style_const, content_const, content_const2
+    return style_const, content_const
 
 
 def copy_model():
@@ -68,8 +71,8 @@ def copy_model():
     layer = BatchNormalization(axis=channel_axis, name='bn2_work')
     x = layer(x)
     layer.set_weights(features.layers[7].get_weights())
-    x = ELU(name='elu2_work')(x)
-    x = MaxPooling2D(pool_size=(2, 4), name='pool2_work')(x)
+    style_out = ELU(name='elu2_work')(x)
+    x = MaxPooling2D(pool_size=(2, 4), name='pool2_work')(style_out)
 
     # Conv block 3
     layer = Convolution2D(128, (3, 3), padding='same', name='conv3_work')
@@ -88,8 +91,8 @@ def copy_model():
     layer = BatchNormalization(axis=channel_axis, name='bn4_work')
     x = layer(x)
     layer.set_weights(features.layers[15].get_weights())
-    content2 = ELU(name='elu4_work')(x)
-    x = MaxPooling2D(pool_size=(3, 5), name='pool4_work')(content2)
+    content_out = ELU(name='elu4_work')(x)
+    '''x = MaxPooling2D(pool_size=(3, 5), name='pool4_work')(content_out)
 
     # Conv block 5
     layer = Convolution2D(64, (3, 3), padding='same', name='conv5_work')
@@ -98,19 +101,19 @@ def copy_model():
     layer = BatchNormalization(axis=channel_axis, name='bn5_work')
     x = layer(x)
     layer.set_weights(features.layers[19].get_weights())
-    x = ELU(name='elu5_work')(x)
-    return target_data, style_out, content2, x
+    x = ELU(name='elu5_work')(x)'''
+    return target_data, style_out, content_out
 
 
 def build_model():
-    f_style, f_content, f_content2 = calculate_features()
-    target, d_style, d_content, d_content2 = copy_model()
+    f_style, f_content = calculate_features()
+    target, d_style, d_content = copy_model()
 
     style_loss = tfnn.l2_loss(f_style - d_style)
-    content_loss = tfnn.l2_loss(f_content - d_content) + tfnn.l2_loss(f_content2 - d_content2)
-    loss = style_loss + 1000*content_loss
+    content_loss = tfnn.l2_loss(f_content - d_content)
+    loss = style_loss + 10 * content_loss
 
-    optimizer = tf.train.AdamOptimizer(0.01)
+    optimizer = tf.train.AdamOptimizer(0.1)
     train = optimizer.minimize(loss, name="optimizer", var_list=[target])
 
     tf.summary.FileWriter("./log/", graph=tf.get_default_graph())
