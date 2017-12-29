@@ -40,7 +40,7 @@ def get_spectro(file):
 
 
 def sound_from_spectro(spectro):
-    in_data = np.exp(np.swapaxes(spectro[0][0], 0, 1))
+    in_data = np.exp(np.swapaxes(spectro, 0, 1))
     out_data = []
     for i in range(FRAMES):
         out_data.append(np.fft.irfft(in_data[i]))
