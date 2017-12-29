@@ -11,7 +11,7 @@ from keras import backend as K
 import tensorflow as tf
 from tensorflow import nn as tfnn
 
-model_path = "./model/stupid_model_tensorflow.h5"
+model_path = "./model/mid_model_tensorflow.h5"
 style_file = "style.au"
 content_file = "content.au"
 

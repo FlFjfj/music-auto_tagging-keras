@@ -14,15 +14,16 @@ OUT_BR = 4
 
 melgram_shape = (0, 1, N_FFT2, FRAMES)
 
+
 def get_spectro(file):
     src, sr = librosa.load(file, sr=SR)  # whole signal
     n_sample = src.shape[0]
-    n_sample_fit = int(DURA*SR)
+    n_sample_fit = int(DURA * SR)
 
     if n_sample < n_sample_fit:  # if too short
-        src = np.hstack((src, np.zeros((int(DURA*SR) - n_sample,))))
+        src = np.hstack((src, np.zeros((int(DURA * SR) - n_sample,))))
     elif n_sample > n_sample_fit:  # if too long
-        src = src[(n_sample-n_sample_fit)//2:(n_sample+n_sample_fit)//2]
+        src = src[(n_sample - n_sample_fit) // 2:(n_sample + n_sample_fit) // 2]
 
     hann = np.hanning(N_FFT)
     spectral = [[0.00000001] * FRAMES for _ in range(N_FFT2)]
@@ -50,9 +51,9 @@ def sound_from_spectro(spectro):
     for i in range(FRAMES - 1):
         result.extend(out_data[i][HOP_LEN:N_FFT - N_MIX])
         left = out_data[i][N_FFT - N_MIX:]
-        right = out_data[i+1][HOP_LEN - N_MIX:HOP_LEN]
+        right = out_data[i + 1][HOP_LEN - N_MIX:HOP_LEN]
         for j in range(N_MIX):
-            result.append((left[j] + j * right[j]) / (j+1))
+            result.append((left[j] + j * right[j]) / (j + 1))
 
     result = np.array(list(map(lambda x: np.int32(x * (1 << (OUT_BR * 8))), result)), dtype=np.int32)
     raw = result.tobytes()

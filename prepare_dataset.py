@@ -1,11 +1,10 @@
-import librosa
 import numpy as np
 import audio_processor as ap
 import music_tagger_cnn as cnnmodel
 import os
 
 dataset_dir = "./genres/"
-max_files = 10
+max_files = 1
 def main():
     train_x = np.zeros(ap.melgram_shape )
     train_y = np.zeros((0, len(cnnmodel.tags)), dtype=np.bool)

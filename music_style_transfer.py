@@ -1,10 +1,7 @@
 import numpy as np
 import audio_processor as ap
 import tranfer_model as tm
-import keras
 from keras import backend as K
-import tensorflow as tf
-from tensorflow import losses as tfl
 
 
 def main():
