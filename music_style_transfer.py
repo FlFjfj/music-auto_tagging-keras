@@ -9,7 +9,7 @@ def main():
 
     sess = K.get_session()
 
-    for i in range(200):
+    for i in range(500):
         if i % 10 == 0:
             loss_val, _ = sess.run([loss, train], {K.learning_phase(): 0})
             print("Iteration", i, "loss:", loss_val)

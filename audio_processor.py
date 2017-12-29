@@ -46,7 +46,7 @@ def sound_from_spectro(spectro):
     for i in range(FRAMES):
         out_data.append(np.fft.irfft(in_data[i]))
 
-    result = list([0][0:N_MIX])
+    result = list(out_data[0][0:HOP_LEN])
 
     for i in range(FRAMES - 1):
         result.extend(out_data[i][HOP_LEN:N_FFT - N_MIX])
@@ -56,6 +56,38 @@ def sound_from_spectro(spectro):
             result.append((left[j] + j * right[j]) / (j + 1))
 
     result = np.array(list(map(lambda x: np.int32(x * (1 << (OUT_BR * 8))), result)), dtype=np.int32)
+    raw = result.tobytes()
+
+    file = wave.open("output.wav", 'w')
+    file.setframerate(SR)
+    file.setsampwidth(OUT_BR)
+    file.setnchannels(1)
+    file.writeframes(raw)
+    file.close()
+
+
+def sound_from_spectro_imaginary(spectro, imaginary):
+    spectro = np.exp(np.swapaxes(spectro, 0, 1))
+    in_data = []
+    for i in range(FRAMES):
+        buf = [0 for _ in range(N_FFT2)]
+        for j in range(N_FFT2):
+            buf[j] = spectro[i][j] + imaginary
+
+    out_data = []
+    for i in range(FRAMES):
+        out_data.append(np.fft.ifft(in_data[i]))
+
+    result = list(out_data[0][0:HOP_LEN])
+
+    for i in range(FRAMES - 1):
+        result.extend(out_data[i][HOP_LEN:N_FFT - N_MIX])
+        left = out_data[i][N_FFT - N_MIX:]
+        right = out_data[i + 1][HOP_LEN - N_MIX:HOP_LEN]
+        for j in range(N_MIX):
+            result.append((left[j] + j * right[j]) / (j + 1))
+
+    result = np.array(list(map(lambda x: np.int32(x.real * (1 << (OUT_BR * 8))), result)), dtype=np.int32)
     raw = result.tobytes()
 
     file = wave.open("output.wav", 'w')
